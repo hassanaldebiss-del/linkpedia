@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Linkpedia — News</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2f2f2;--white:#fff;--ink:#202124;--ink2:#3c4043;
+  --muted:#70757a;--border:#dadce0;--blue:#1a73e8;--blue-bg:#e8f0fe;
+  --red:#d93025;--green:#1e8e3e;--gold:#f9ab00;--purple:#7b61ff;
+  --sans:'Google Sans','Roboto',Arial,sans-serif;--radius:8px;
+  --shadow:0 1px 2px rgba(60,64,67,.3),0 2px 6px rgba(60,64,67,.15);
+  --shadow-sm:0 1px 2px rgba(60,64,67,.2),0 1px 3px rgba(60,64,67,.1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh}
+
+.topbar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;height:64px}
+.tb-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:16px}
+.logo{font-weight:700;font-size:1.3rem;color:var(--ink);text-decoration:none;letter-spacing:-0.02em;flex-shrink:0}
+.logo span{color:var(--blue)}
+.search-box{flex:1;max-width:560px;position:relative}
+.search-box input{width:100%;background:var(--bg);border:1px solid transparent;border-radius:24px;padding:10px 20px 10px 44px;font-size:0.88rem;font-family:var(--sans);color:var(--ink);outline:none;transition:all 0.2s}
+.search-box input:focus{background:var(--white);border-color:var(--border);box-shadow:0 1px 6px rgba(32,33,36,.28)}
+.search-box::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+.tb-actions{margin-left:auto;display:flex;gap:4px}
+.tb-btn{width:40px;height:40px;border-radius:50%;border:none;background:none;cursor:pointer;font-size:1.1rem;color:var(--muted);transition:background 0.15s;display:flex;align-items:center;justify-content:center}
+.tb-btn:hover{background:var(--bg)}
+
+.section-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:190;overflow-x:auto;scrollbar-width:none}
+.section-bar::-webkit-scrollbar{display:none}
+.sb-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex}
+.s-tab{display:flex;align-items:center;gap:5px;padding:14px 16px;font-size:0.82rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans);transition:all 0.15s}
+.s-tab:hover{color:var(--blue);background:var(--blue-bg)}
+.s-tab.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+.s-tab-divider{width:1px;height:24px;background:var(--border);flex-shrink:0;margin:auto 4px}
+
+.page{max-width:1280px;margin:0 auto;padding:20px 24px;display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+
+.feed-section{margin-bottom:28px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-label{font-size:0.74rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.sec-label .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sec-all{font-size:0.76rem;color:var(--blue);cursor:pointer;font-weight:500}
+.sec-all:hover{text-decoration:underline}
+
+.top-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:2px;cursor:pointer;transition:box-shadow 0.2s}
+.top-card:hover{box-shadow:var(--shadow)}
+.tc-body{padding:16px}
+.tc-sec{font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.tc-title{font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:8px;transition:color 0.15s}
+.top-card:hover .tc-title{color:var(--blue)}
+.tc-sum{font-size:0.82rem;color:var(--ink2);line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tc-src-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.src-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:#fff;flex-shrink:0}
+.src-name-link{font-size:0.78rem;font-weight:600;color:var(--ink2);cursor:pointer;border:none;background:none;font-family:var(--sans);padding:0}
+.src-name-link:hover{color:var(--blue);text-decoration:underline}
+.tc-dot{width:3px;height:3px;background:var(--muted);border-radius:50%}
+.tc-time{font-size:0.74rem;color:var(--muted)}
+.badge-new{font-size:0.6rem;font-weight:700;color:var(--red);background:rgba(217,48,37,0.08);padding:1px 6px;border-radius:4px}
+.badge-hot{font-size:0.6rem;font-weight:700;color:#e37400;background:rgba(227,116,0,0.08);padding:1px 6px;border-radius:4px}
+.flag-badge{font-size:0.7rem}
+.follow-src-btn{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:0.74rem;font-weight:500;cursor:pointer;font-family:var(--sans);color:var(--muted);background:none;transition:all 0.15s;white-space:nowrap;flex-shrink:0}
+.follow-src-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.follow-src-btn.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+.cluster{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:2px}
+.cl-row{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.1s}
+.cl-row:last-child{border-bottom:none}
+.cl-row:hover{background:#fafafa}
+.cl-row:hover .cl-title{color:var(--blue)}
+.cl-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px}
+.cl-body{flex:1;min-width:0}
+.cl-title{font-size:0.84rem;font-weight:500;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color 0.12s;margin-bottom:3px}
+.cl-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cl-src{font-size:0.7rem;font-weight:600;color:var(--muted);cursor:pointer}
+.cl-src:hover{color:var(--blue)}
+.cl-time{font-size:0.68rem;color:var(--muted)}
+.cl-star{background:none;border:none;cursor:pointer;font-size:0.9rem;color:var(--muted);padding:2px 4px;border-radius:4px;transition:transform 0.15s;flex-shrink:0;margin-top:1px}
+.cl-star:hover{transform:scale(1.2)}
+.cl-star.on{color:var(--gold)}
+
+.feed-ad{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start}
+.ad-lbl{font-size:0.55rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;flex-shrink:0;margin-top:2px;text-transform:uppercase}
+.ad-body .ad-t{font-size:0.8rem;font-weight:600;color:var(--blue);display:block;cursor:pointer;margin-bottom:2px}
+.ad-body .ad-t:hover{text-decoration:underline}
+.ad-body .ad-u{font-size:0.62rem;color:var(--green);display:block;margin-bottom:3px}
+.ad-body .ad-d{font-size:0.72rem;color:var(--muted);line-height:1.4}
+
+.sidebar{}
+.widget{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-bottom:16px;overflow:hidden}
+.w-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.w-title{font-size:0.84rem;font-weight:700;color:var(--ink)}
+.w-action{font-size:0.74rem;color:var(--blue);cursor:pointer;font-weight:500}
+.w-action:hover{text-decoration:underline}
+
+.my-src-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.my-src-row:last-child{border-bottom:none}
+.my-src-row:hover{background:var(--bg)}
+.msr-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;color:#fff;flex-shrink:0}
+.msr-info{flex:1;min-width:0}
+.msr-name{font-size:0.8rem;font-weight:600;color:var(--ink);display:block}
+.msr-cat{font-size:0.68rem;color:var(--muted)}
+.msr-rm{background:none;border:none;cursor:pointer;font-size:0.82rem;color:var(--muted);padding:4px 6px;border-radius:4px;transition:color 0.15s;font-family:var(--sans)}
+.msr-rm:hover{color:var(--red);background:rgba(217,48,37,0.06)}
+
+.src-search{padding:10px 16px;border-bottom:1px solid var(--border)}
+.src-search input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:0.78rem;font-family:var(--sans);color:var(--ink);outline:none}
+.src-search input:focus{border-color:var(--blue)}
+.all-src-list{max-height:320px;overflow-y:auto}
+.all-src-list::-webkit-scrollbar{width:4px}
+.all-src-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.asr-row{display:flex;align-items:center;gap:9px;padding:8px 16px;border-bottom:1px solid var(--border);transition:background 0.1s}
+.asr-row:last-child{border-bottom:none}
+.asr-row:hover{background:var(--bg)}
+.asr-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;color:#fff;flex-shrink:0}
+.asr-info{flex:1;min-width:0}
+.asr-name{font-size:0.78rem;font-weight:600;color:var(--ink)}
+.asr-cat{font-size:0.65rem;color:var(--muted)}
+.asr-btn{background:none;border:1px solid var(--border);border-radius:14px;padding:3px 11px;font-size:0.7rem;font-weight:500;cursor:pointer;font-family:var(--sans);color:var(--muted);transition:all 0.15s;flex-shrink:0}
+.asr-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.asr-btn.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+.tr-row{display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.tr-row:last-child{border-bottom:none}
+.tr-row:hover{background:var(--bg)}
+.tr-n{font-size:0.64rem;font-weight:700;color:var(--muted);width:16px;text-align:center;flex-shrink:0}
+.tr-tag{font-size:0.8rem;font-weight:500;color:var(--ink);flex:1}
+.tr-count{font-size:0.66rem;color:var(--muted)}
+
+.mkt-row{display:flex;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);gap:8px}
+.mkt-row:last-child{border-bottom:none}
+.mkt-name{flex:1;font-size:0.78rem;font-weight:600;color:var(--ink)}
+.mkt-val{font-size:0.78rem;font-weight:700;font-family:monospace}
+.mkt-chg{font-size:0.68rem;font-weight:600;padding:2px 6px;border-radius:4px}
+.mkt-chg.up{color:var(--green);background:rgba(30,142,62,0.08)}
+.mkt-chg.down{color:var(--red);background:rgba(217,48,37,0.08)}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.popup{background:var(--white);border-radius:12px;max-width:640px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.2);animation:fadeup 0.2s ease}
+.pop-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.pop-src-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.pop-src-inf{flex:1}
+.pop-src-nm{font-size:0.84rem;font-weight:700;color:var(--ink)}
+.pop-src-cat{font-size:0.68rem;color:var(--muted)}
+.pop-fol{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:0.76rem;font-weight:500;cursor:pointer;font-family:var(--sans);color:var(--muted);background:none;transition:all 0.15s;flex-shrink:0}
+.pop-fol:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.pop-fol.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.pop-x{width:34px;height:34px;border:none;border-radius:50%;background:var(--bg);cursor:pointer;font-size:1rem;color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--sans);transition:all 0.15s;flex-shrink:0}
+.pop-x:hover{background:var(--border);color:var(--ink)}
+.pop-body{padding:20px}
+.pop-sec-lbl{font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.pop-ttl{font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:10px}
+.pop-meta{display:flex;gap:14px;margin-bottom:14px;font-size:0.75rem;color:var(--muted)}
+.pop-sum{font-size:0.9rem;color:var(--ink2);line-height:1.7;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.pop-ad{background:var(--bg);border-radius:6px;padding:10px 12px;margin-bottom:16px;display:flex;gap:10px}
+.pop-ad-lbl{font-size:0.55rem;font-weight:700;letter-spacing:0.1em;color:var(--muted);background:var(--white);border:1px solid var(--border);border-radius:3px;padding:1px 5px;flex-shrink:0;margin-top:2px;text-transform:uppercase}
+.pop-rel-hd{font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.pop-rel-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.pop-rel-item:last-child{border-bottom:none}
+.pop-rel-item:hover .pop-rel-ttl{color:var(--blue)}
+.pop-rel-av{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:700;color:#fff;margin-top:2px}
+.pop-rel-src{font-size:0.7rem;font-weight:600;color:var(--muted);display:block;margin-bottom:2px}
+.pop-rel-ttl{font-size:0.82rem;font-weight:500;color:var(--ink);line-height:1.35;transition:color 0.12s}
+.pop-link{display:block;text-align:center;margin-top:16px;padding:10px;background:var(--blue);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:opacity 0.15s}
+.pop-link:hover{opacity:0.9}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:24px;font-size:0.8rem;font-weight:500;z-index:900;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{display:none}}
+@media(max-width:640px){.tb-inner,.sb-inner,.page{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-inner">
+    <a class="logo" href="#">Link<span>pedia</span></a>
+    <div class="search-box"><input type="text" placeholder="Search news..."/></div>
+    <div class="tb-actions">
+      <button class="tb-btn" onclick="toast('Notifications coming soon')">🔔</button>
+      <button class="tb-btn" onclick="toast('Settings coming soon')">⚙️</button>
+    </div>
+  </div>
+</header>
+
+<nav class="section-bar">
+  <div class="sb-inner">
+    <button class="s-tab on" onclick="switchSec('all',this)">For You</button>
+    <button class="s-tab" onclick="switchSec('trending',this)">🔥 Trending</button>
+    <button class="s-tab" onclick="switchSec('hot',this)">⚡ Hot</button>
+    <button class="s-tab" onclick="switchSec('recent',this)">🕒 Recent</button>
+    <div class="s-tab-divider"></div>
+    <button class="s-tab" onclick="switchSec('following',this)">⭐ Following</button>
+  </div>
+</nav>
+
+<div class="page">
+  <section><div id="feed"></div></section>
+  <aside class="sidebar">
+    <div class="widget">
+      <div class="w-head"><span class="w-title">⭐ My Sources</span><span class="w-action" onclick="scrollToSources()">Add sources</span></div>
+      <div id="my-sources"><div style="padding:14px 16px;font-size:0.78rem;color:var(--muted);line-height:1.7">No sources followed yet.<br>Click <strong>☆</strong> next to any story to follow its source.</div></div>
+    </div>
+
+    <div class="widget">
+      <div class="w-head"><span class="w-title">📈 Markets</span></div>
+      <div class="mkt-row"><span class="mkt-name">S&P 500</span><span class="mkt-val">5,842</span><span class="mkt-chg up">▲ 0.4%</span></div>
+      <div class="mkt-row"><span class="mkt-name">FTSE 100</span><span class="mkt-val">8,124</span><span class="mkt-chg down">▼ 0.2%</span></div>
+      <div class="mkt-row"><span class="mkt-name">Nasdaq</span><span class="mkt-val">18,340</span><span class="mkt-chg up">▲ 0.7%</span></div>
+      <div class="mkt-row"><span class="mkt-name">GBP/USD</span><span class="mkt-val">1.2714</span><span class="mkt-chg down">▼ 0.1%</span></div>
+      <div class="mkt-row"><span class="mkt-name">Bitcoin</span><span class="mkt-val">$87,420</span><span class="mkt-chg up">▲ 2.1%</span></div>
+    </div>
+
+    <div class="widget">
+      <div class="w-head"><span class="w-title">Trending</span></div>
+      <div class="tr-row"><span class="tr-n">1</span><span class="tr-tag">US Tariffs</span><span class="tr-count">84k</span></div>
+      <div class="tr-row"><span class="tr-n">2</span><span class="tr-tag">UK Budget</span><span class="tr-count">61k</span></div>
+      <div class="tr-row"><span class="tr-n">3</span><span class="tr-tag">Trump Trial</span><span class="tr-count">52k</span></div>
+      <div class="tr-row"><span class="tr-n">4</span><span class="tr-tag">Premier League</span><span class="tr-count">48k</span></div>
+      <div class="tr-row"><span class="tr-n">5</span><span class="tr-tag">Apple AI</span><span class="tr-count">39k</span></div>
+      <div class="tr-row"><span class="tr-n">6</span><span class="tr-tag">Australia Election</span><span class="tr-count">31k</span></div>
+    </div>
+
+    <div class="widget" style="padding:14px 16px">
+      <div style="font-size:0.55rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Sponsored</div>
+      <span style="font-size:0.8rem;font-weight:600;color:var(--blue);display:block;cursor:pointer;margin-bottom:2px">The Economist — Subscribe Now</span>
+      <span style="font-size:0.62rem;color:var(--green);display:block;margin-bottom:4px">economist.com</span>
+      <span style="font-size:0.72rem;color:var(--muted)">Get unrivalled analysis on global politics, business and finance. First 3 months free.</span>
+    </div>
+
+    <div class="widget" id="all-src-widget">
+      <div class="w-head"><span class="w-title">All Sources</span></div>
+      <div class="src-search"><input type="text" id="src-q" placeholder="Search sources..." oninput="renderAllSrc(this.value)"/></div>
+      <div class="all-src-list" id="all-src-list"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target.id==='overlay')closePop()">
+  <div class="popup">
+    <div class="pop-hd">
+      <div class="pop-src-av" id="pop-av"></div>
+      <div class="pop-src-inf"><div class="pop-src-nm" id="pop-nm"></div><div class="pop-src-cat" id="pop-cat-lbl"></div></div>
+      <button class="pop-fol" id="pop-fol" onclick="togglePopFol()"><span id="pop-fol-star">☆</span><span id="pop-fol-txt">Follow</span></button>
+      <button class="pop-x" onclick="closePop()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="pop-sec-lbl" id="pop-sec"></div>
+      <div class="pop-ttl" id="pop-ttl"></div>
+      <div class="pop-meta"><span id="pop-time"></span><span id="pop-views"></span></div>
+      <div class="pop-sum" id="pop-sum"></div>
+      <div class="pop-ad">
+        <span class="pop-ad-lbl">Ad</span>
+        <div>
+          <span style="font-size:0.78rem;font-weight:600;color:var(--blue);display:block;cursor:pointer;margin-bottom:2px">The Economist — Award-winning journalism</span>
+          <span style="font-size:0.62rem;color:var(--green);display:block;margin:2px 0 3px">economist.com</span>
+          <span style="font-size:0.72rem;color:var(--muted)">In-depth analysis of politics, business and world affairs. Subscribe today.</span>
+        </div>
+      </div>
+      <div class="pop-rel-hd">Related Stories</div>
+      <div id="pop-rel"></div>
+      <a class="pop-link" id="pop-link" href="#" target="_blank">Read Full Article →</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+const CATS={
+  politics:{label:'Politics',icon:'🏛️',color:'#d93025'},
+  finance:{label:'Finance',icon:'📈',color:'#1e8e3e'},
+  sports:{label:'Sports',icon:'🏆',color:'#1a73e8'},
+  tech:{label:'Technology',icon:'💻',color:'#7b61ff'},
+  world:{label:'World',icon:'🌍',color:'#e37400'},
+  entertainment:{label:'Entertainment',icon:'🎬',color:'#f9ab00'},
+  science:{label:'Science',icon:'🔬',color:'#0097a7'},
+};
+
+const SRC_COLORS={
+  'BBC News':'#990000','The Guardian':'#052962','Reuters':'#ff8000',
+  'The Times':'#c8122a','Sky News':'#0d47a1','The Telegraph':'#003399',
+  'Financial Times':'#f2dfce','Bloomberg':'#000000','The Independent':'#e52713',
+  'Daily Mail':'#004192','CNN':'#cc0000','Associated Press':'#c8122a',
+  'The Economist':'#e3120b','Wall Street Journal':'#000000','Fox News':'#003366',
+  'The Irish Times':'#003c69','Irish Independent':'#e63329','RTE News':'#005a9c',
+  'ABC News Australia':'#00698f','The Australian':'#c8122a','Sydney Morning Herald':'#003c69',
+  'The Age':'#003c69','ABC (US)':'#007fad','NBC News':'#fa5c1c',
+  'Washington Post':'#231f20','New York Times':'#000000','Politico':'#003366',
+  'CNBC':'#005595','The Spectator':'#b22222',
+};
+const c=s=>SRC_COLORS[s]||'#5f6368';
+const av=s=>s.replace(/[^a-zA-Z]/g,'').charAt(0).toUpperCase()||'?';
+
+const SOURCES=[
+  // US
+  {name:'CNN',cat:'🇺🇸 US',f:false},{name:'Reuters',cat:'🇺🇸 US / Global',f:false},
+  {name:'Associated Press',cat:'🇺🇸 US / Global',f:false},{name:'Wall Street Journal',cat:'🇺🇸 US',f:false},
+  {name:'New York Times',cat:'🇺🇸 US',f:false},{name:'Washington Post',cat:'🇺🇸 US',f:false},
+  {name:'Bloomberg',cat:'🇺🇸 US / Finance',f:false},{name:'Fox News',cat:'🇺🇸 US',f:false},
+  {name:'NBC News',cat:'🇺🇸 US',f:false},{name:'ABC (US)',cat:'🇺🇸 US',f:false},
+  {name:'Politico',cat:'🇺🇸 US / Politics',f:false},{name:'CNBC',cat:'🇺🇸 US / Finance',f:false},
+  // UK
+  {name:'BBC News',cat:'🇬🇧 UK',f:false},{name:'The Guardian',cat:'🇬🇧 UK',f:false},
+  {name:'The Times',cat:'🇬🇧 UK',f:false},{name:'Sky News',cat:'🇬🇧 UK',f:false},
+  {name:'The Telegraph',cat:'🇬🇧 UK',f:false},{name:'Financial Times',cat:'🇬🇧 UK / Finance',f:false},
+  {name:'The Independent',cat:'🇬🇧 UK',f:false},{name:'Daily Mail',cat:'🇬🇧 UK',f:false},
+  {name:'The Economist',cat:'🇬🇧 UK / Global',f:false},{name:'The Spectator',cat:'🇬🇧 UK',f:false},
+  // Ireland
+  {name:'The Irish Times',cat:'🇮🇪 Ireland',f:false},{name:'Irish Independent',cat:'🇮🇪 Ireland',f:false},
+  {name:'RTE News',cat:'🇮🇪 Ireland',f:false},
+  // Australia
+  {name:'ABC News Australia',cat:'🇦🇺 Australia',f:false},{name:'The Australian',cat:'🇦🇺 Australia',f:false},
+  {name:'Sydney Morning Herald',cat:'🇦🇺 Australia',f:false},{name:'The Age',cat:'🇦🇺 Australia',f:false},
+];
+
+const A=[
+  // POLITICS
+  {id:1,sec:'politics',src:'Politico',title:'Trump signs sweeping executive order imposing 25% tariffs on all imports from Canada and Mexico, markets rattle',time:'12 min ago',isNew:true,hot:true,views:184000,tag:'US Politics',flag:'🇺🇸',url:'#',sum:"President Trump signed a major executive order imposing blanket 25% tariffs on goods imported from Canada and Mexico, citing border security failures. Markets immediately fell on the announcement, with the Dow dropping over 600 points before partially recovering. Both Ottawa and Mexico City said they would retaliate with counter-tariffs within 48 hours."},
+  {id:2,sec:'politics',src:'BBC News',title:"UK Chancellor Rachel Reeves faces cabinet rebellion over welfare cuts as Labour MPs threaten to vote against the government's plans",time:'28 min ago',isNew:true,hot:false,views:92000,tag:'UK Politics',flag:'🇬🇧',url:'#',sum:"More than 40 Labour MPs have written to the Chancellor demanding she row back on planned welfare reforms that would strip disability benefits from hundreds of thousands of claimants. The internal revolt threatens to derail the Government's flagship spending reduction programme."},
+  {id:3,sec:'politics',src:'The Irish Times',title:'Taoiseach Micheál Martin travels to Washington in bid to shield Ireland from US tariff threats amid fears for tech sector',time:'1 hr ago',isNew:false,hot:true,views:48000,tag:'Irish Politics',flag:'🇮🇪',url:'#',sum:"Ireland's Taoiseach has flown to Washington for emergency talks with the US Trade Representative to seek exemptions for Ireland from threatened tech sector tariffs. Ireland hosts European headquarters for Apple, Google and Meta and a trade dispute could cost tens of thousands of jobs."},
+  {id:4,sec:'politics',src:'ABC News Australia',title:"Australian PM Albanese calls snap election for May 3 as opposition leader Dutton closes gap in polls",time:'2 hr ago',isNew:false,hot:true,views:71000,tag:'Australian Politics',flag:'🇦🇺',url:'#',sum:"Prime Minister Anthony Albanese has called the Australian federal election for May 3, with the Labor government holding a narrow lead over Peter Dutton's Liberal-National coalition. Cost of living and housing affordability are expected to dominate the campaign."},
+  {id:5,sec:'politics',src:'The Guardian',title:'Keir Starmer reshuffles cabinet, sacking two senior ministers after poor polling numbers',time:'3 hr ago',isNew:false,hot:false,views:56000,tag:'UK Politics',flag:'🇬🇧',url:'#',sum:"Prime Minister Keir Starmer has conducted a significant cabinet reshuffle, removing two senior figures from his front bench following a sustained dip in Labour's approval ratings. The move is seen as an attempt to reset the government's agenda ahead of local elections."},
+  {id:6,sec:'politics',src:'Washington Post',title:'Senate passes $1.2 trillion government funding bill minutes before midnight shutdown deadline',time:'5 hr ago',isNew:false,hot:false,views:103000,tag:'US Politics',flag:'🇺🇸',url:'#',sum:'The US Senate passed a stopgap spending measure with bipartisan support just before the midnight deadline, averting a federal government shutdown that would have furloughed hundreds of thousands of workers. The bill now heads to the President for signature.'},
+
+  // FINANCE
+  {id:7,sec:'finance',src:'Bloomberg',title:"Federal Reserve holds rates steady but signals only one cut in 2025 as inflation proves stickier than expected",time:'8 min ago',isNew:true,hot:true,views:142000,tag:'US Economy',flag:'🇺🇸',url:'#',sum:"The Federal Reserve kept its benchmark interest rate unchanged at 5.25–5.50% and revised its 2025 projections to show just one quarter-point cut this year, down from three. Chair Jerome Powell cited persistent services inflation and a resilient labour market as reasons for the more cautious stance."},
+  {id:8,sec:'finance',src:'Financial Times',title:"Bank of England cuts interest rates to 4.25%, first reduction since pandemic era",time:'35 min ago',isNew:true,hot:true,views:88000,tag:'UK Economy',flag:'🇬🇧',url:'#',sum:"The Bank of England's Monetary Policy Committee voted 6-3 to cut the base rate by 25 basis points to 4.25%, marking the first reduction in over three years. Governor Andrew Bailey said the committee was confident inflation was on a 'sustained path' back to the 2% target."},
+  {id:9,sec:'finance',src:'CNBC',title:"Apple reports record Q1 revenue of $124bn, announces $110bn share buyback — biggest in company history",time:'1 hr ago',isNew:false,hot:true,views:96000,tag:'Earnings',flag:'🇺🇸',url:'#',sum:"Apple posted quarterly revenue of $124 billion, beating Wall Street estimates by $3.2 billion. The company also announced a record $110 billion share buyback programme. iPhone sales surprised to the upside despite concerns about China demand, rising 6% year-on-year."},
+  {id:10,sec:'finance',src:'The Economist',title:"The global trade war is accelerating de-dollarisation faster than anyone predicted",time:'2 hr ago',isNew:false,hot:false,views:61000,tag:'Global Economy',flag:'🇬🇧',url:'#',sum:"A wave of US tariff actions has prompted central banks in Asia and the Middle East to quietly accelerate efforts to settle trade in currencies other than the dollar. While the dollar remains dominant, its share of global reserves has fallen to its lowest level in 25 years."},
+  {id:11,sec:'finance',src:'Reuters',title:"HSBC reports $8.9bn pre-tax profit, beats estimates, launches new $3bn buyback",time:'3 hr ago',isNew:false,hot:false,views:44000,tag:'Banking',flag:'🇬🇧',url:'#',sum:"HSBC Holdings reported first-quarter pre-tax profit of $8.9 billion, comfortably ahead of the $7.6 billion analyst consensus. The bank announced a fresh $3 billion share buyback and maintained its full-year revenue guidance despite macroeconomic headwinds."},
+  {id:12,sec:'finance',src:'Sydney Morning Herald',title:"Australia's big four banks facing fresh mortgage stress inquiry as arrears hit 11-year high",time:'4 hr ago',isNew:false,hot:true,views:39000,tag:'Australian Economy',flag:'🇦🇺',url:'#',sum:"The Australian Prudential Regulation Authority has launched a review into mortgage stress across the country's four major banks after data showed home loan arrears reached their highest level since 2013. Analysts warn of a potential wave of forced sales if rates stay elevated."},
+
+  // SPORTS
+  {id:13,sec:'sports',src:'BBC News',title:"Manchester City sack Pep Guardiola after shock 4–1 defeat to Ipswich leaves them 14th in the Premier League",time:'22 min ago',isNew:true,hot:true,views:276000,tag:'Premier League',flag:'🇬🇧',url:'#',sum:"Manchester City have parted ways with manager Pep Guardiola following a dismal home defeat to newly-promoted Ipswich Town that left the club in the bottom half of the Premier League table. Guardiola's nine-year reign ends with six league titles. Xabi Alonso is the immediate frontrunner to replace him."},
+  {id:14,sec:'sports',src:'The Guardian',title:"England clinch Ashes with one Test to spare as Stokes and Root put Australia to the sword at Headingley",time:'1 hr ago',isNew:true,hot:true,views:118000,tag:'Cricket',flag:'🇬🇧',url:'#',sum:"England retained the Ashes with a commanding 8-wicket victory at Headingley. Ben Stokes took five wickets and Joe Root scored an unbeaten 142 to complete a famous victory that sealed the series 3-1 with a game remaining."},
+  {id:15,sec:'sports',src:'Sky News',title:"Rory McIlroy wins The Masters to complete career Grand Slam — one of sport's greatest achievements",time:'2 hr ago',isNew:false,hot:true,views:204000,tag:'Golf',flag:'🇬🇧',url:'#',sum:"Rory McIlroy ended his 11-year wait for a Masters title with a stunning final round 65 to claim the Green Jacket and complete golf's career Grand Slam. The Northern Irishman broke down in tears on the 18th green after holing his final putt."},
+  {id:16,sec:'sports',src:'ABC News Australia',title:"Australia beat New Zealand in Rugby World Cup final, Wallabies claim first title since 1999",time:'3 hr ago',isNew:false,hot:true,views:89000,tag:'Rugby',flag:'🇦🇺',url:'#',sum:"Australia defeated New Zealand 24–17 in a thrilling Rugby World Cup final in Paris. The Wallabies held on despite a furious All Blacks comeback in the final quarter to claim their third World Cup title and end a 26-year wait."},
+  {id:17,sec:'sports',src:'The Times',title:"Chelsea sign Lamine Yamal from Barcelona for world record £250m fee",time:'5 hr ago',isNew:false,hot:false,views:167000,tag:'Football Transfers',flag:'🇬🇧',url:'#',sum:"Chelsea have broken the world transfer record by signing Spanish wonderkid Lamine Yamal from Barcelona for a reported £250 million. The 18-year-old has signed a seven-year contract at Stamford Bridge in the most expensive deal in football history."},
+
+  // TECH
+  {id:18,sec:'tech',src:'Reuters',title:"OpenAI launches GPT-5, claims it achieves human-level reasoning on every major benchmark",time:'5 min ago',isNew:true,hot:true,views:231000,tag:'Artificial Intelligence',flag:'🇺🇸',url:'#',sum:"OpenAI has released GPT-5, claiming the model surpasses human-expert level performance across law, medicine, mathematics and coding benchmarks. CEO Sam Altman called it 'a turning point in the history of intelligence'. The model is available to ChatGPT Plus subscribers immediately."},
+  {id:19,sec:'tech',src:'The Telegraph',title:"Elon Musk's X sues the EU over Digital Services Act enforcement, calling it 'censorship by another name'",time:'48 min ago',isNew:true,hot:false,views:74000,tag:'Big Tech',flag:'🇬🇧',url:'#',sum:"X Corp has filed a legal challenge against the European Union in the General Court in Luxembourg, alleging that the Digital Services Act's content moderation requirements violate free speech principles. The EU Commission said it was 'fully confident' the DSA would withstand legal scrutiny."},
+  {id:20,sec:'tech',src:'Bloomberg',title:"Apple Intelligence arrives in UK and Australia — Siri finally gets ChatGPT integration after year-long delay",time:'2 hr ago',isNew:false,hot:true,views:58000,tag:'Apple',flag:'🇺🇸',url:'#',sum:"Apple has rolled out its long-delayed Apple Intelligence suite to users in the UK and Australia, bringing ChatGPT integration into Siri for the first time. The feature requires iPhone 15 Pro or newer and arrives nearly 14 months after the US launch."},
+  {id:21,sec:'tech',src:'CNBC',title:"Google agrees to $5.3bn settlement in UK class action over illegal data harvesting from millions of users",time:'3 hr ago',isNew:false,hot:false,views:49000,tag:'Big Tech',flag:'🇬🇧',url:'#',sum:"Google has reached a $5.3 billion settlement in a UK class action lawsuit alleging the company illegally collected personal data from Safari users in private browsing mode between 2011 and 2012. The settlement covers approximately 5.4 million UK users."},
+
+  // WORLD
+  {id:22,sec:'world',src:'Reuters',title:"Ceasefire in Gaza collapses as Israeli forces resume ground offensive; Hamas rejects new terms",time:'18 min ago',isNew:true,hot:true,views:318000,tag:'Middle East',flag:'🌍',url:'#',sum:"A fragile ceasefire in Gaza broke down after Israeli forces launched fresh ground operations in the northern part of the territory. Hamas said it rejected the latest hostage-ceasefire proposal tabled by US mediators. The UN Security Council held an emergency session to discuss the situation."},
+  {id:23,sec:'world',src:'The Guardian',title:"Putin offers surprise prisoner swap involving 12 Western nationals ahead of G7 summit",time:'1 hr ago',isNew:false,hot:true,views:142000,tag:'Russia',flag:'🌍',url:'#',sum:"Russian President Vladimir Putin has signalled willingness to exchange 12 Western nationals currently held in Russian custody in a deal brokered by Turkey ahead of next month's G7 summit. Western capitals said they were studying the proposal cautiously."},
+  {id:24,sec:'world',src:'BBC News',title:"China's economy grows 4.2% in Q1, missing 5% target as trade war bites",time:'2 hr ago',isNew:false,hot:false,views:87000,tag:'China',flag:'🌍',url:'#',sum:"China's National Bureau of Statistics reported GDP growth of 4.2% in the first quarter of 2025, falling short of Beijing's 5% annual target as the impact of US tariffs weighed heavily on the country's export sector. Factory output fell for the third consecutive month."},
+
+  // ENTERTAINMENT
+  {id:25,sec:'entertainment',src:'The Guardian',title:"Succession creator Jesse Armstrong's new HBO series 'The Firm' breaks streaming records in US and UK",time:'30 min ago',isNew:true,hot:true,views:94000,tag:'Television',flag:'🇬🇧',url:'#',sum:"Jesse Armstrong's political drama 'The Firm', about a fictional British prime minister modelled loosely on Tony Blair, drew 14.2 million viewers in its HBO debut — the biggest non-franchise premiere in the streamer's history. Critics are already calling it a potential Emmy frontrunner."},
+  {id:26,sec:'entertainment',src:'Daily Mail',title:"Adele announces 'final ever' world tour, starting in London's Hyde Park this summer",time:'2 hr ago',isNew:false,hot:true,views:178000,tag:'Music',flag:'🇬🇧',url:'#',sum:"Adele has announced what she describes as her 'final ever' concert tour, beginning with five nights at Hyde Park in London. The 36-year-old singer said she intends to step back from public life after the tour concludes and focus on raising her family."},
+  {id:27,sec:'entertainment',src:'ABC News Australia',title:"Australian actress Cate Blanchett wins second Academy Award for 'The Salt Path', longest standing ovation in Oscar history",time:'4 hr ago',isNew:false,hot:false,views:82000,tag:'Film',flag:'🇦🇺',url:'#',sum:"Cate Blanchett claimed her second Oscar for Best Actress for her performance in 'The Salt Path', receiving a six-minute standing ovation — reported to be the longest in the ceremony's history. The film, about a couple who lose everything and walk the South West Coast Path, was a surprise awards season hit."},
+
+  // SCIENCE
+  {id:28,sec:'science',src:'The Independent',title:"Scientists discover a new form of matter that shouldn't exist at room temperature — rewrites physics textbooks",time:'1 hr ago',isNew:true,hot:true,views:63000,tag:'Physics',flag:'🇬🇧',url:'#',sum:"Physicists at Cambridge University and MIT have jointly announced the discovery of a new phase of matter — dubbed 'altermagnetism' — that exhibits properties previously thought impossible at room temperature. The finding, published in Nature, could have profound implications for computing and quantum technologies."},
+  {id:29,sec:'science',src:'BBC News',title:"UK approves world's first personalised cancer vaccine for melanoma, to be available on NHS by 2026",time:'2 hr ago',isNew:false,hot:true,views:91000,tag:'Medicine',flag:'🇬🇧',url:'#',sum:"The UK's Medicines and Healthcare products Regulatory Agency has approved a personalised mRNA cancer vaccine developed by BioNTech and Moderna for the treatment of stage 3 and 4 melanoma. The vaccine is tailored to each patient's specific tumour mutations and is expected to be available on the NHS by early 2026."},
+  {id:30,sec:'science',src:'ABC News Australia',title:"CSIRO confirms evidence of liquid water beneath Mars surface — 'most significant Mars discovery in decades'",time:'4 hr ago',isNew:false,hot:false,views:77000,tag:'Space',flag:'🇦🇺',url:'#',sum:"Australia's CSIRO, working with NASA's Mars Reconnaissance Orbiter team, has confirmed radar signatures consistent with a large body of liquid water roughly 10 kilometres beneath the Martian south pole. Scientists say the finding dramatically increases the chances that microbial life exists or existed on Mars."},
+];
+
+const FEED_ADS=[
+  {t:'The Economist — First 3 months free',u:'economist.com',d:'Award-winning analysis of world politics, economics, science and technology.'},
+  {t:'Bloomberg Markets — Real-time data',u:'bloomberg.com',d:'Track stocks, currencies, commodities and economic indicators as they move.'},
+  {t:'Audible — Listen to the news',u:'audible.co.uk',d:'Catch up on news and current affairs with thousands of audio journalism titles.'},
+];
+
+let _sec='all',_adIdx=0,_openArt=null;
+const isF=n=>SOURCES.find(s=>s.name===n)?.f||false;
+
+function renderFeed(){
+  const el=document.getElementById('feed');el.innerHTML='';_adIdx=0;
+
+  let list,secName,emptyMsg='';
+
+  if(_sec==='all'){
+    list=A;
+  } else if(_sec==='trending'){
+    list=[...A].sort((a,b)=>b.views-a.views);
+    secName='🔥 Trending';
+  } else if(_sec==='hot'){
+    list=A.filter(a=>a.hot).sort((a,b)=>b.views-a.views);
+    secName='⚡ Hot Right Now';
+  } else if(_sec==='recent'){
+    // sort by isNew first, then by id desc (simulates recency)
+    list=[...A].sort((a,b)=>(b.isNew?1:0)-(a.isNew?1:0)||(b.id-a.id));
+    secName='🕒 Recent';
+  } else if(_sec==='following'){
+    list=A.filter(a=>isF(a.src));
+    secName='⭐ Following';
+    emptyMsg=`<div style="background:#fff;border-radius:8px;padding:40px;text-align:center;box-shadow:var(--shadow-sm)"><div style="font-size:2rem;margin-bottom:12px">⭐</div><div style="color:var(--muted);font-size:0.88rem;line-height:1.7">You're not following any sources yet.<br>Click <strong>☆</strong> next to any story to follow its source.</div></div>`;
+  } else {
+    list=A;
+  }
+
+  if(!list.length){el.innerHTML=emptyMsg||'<div style="padding:32px;text-align:center;color:var(--muted)">No stories found.</div>';return;}
+
+  if(_sec==='all'){
+    // Group by category
+    const order=['politics','finance','sports','tech','world','entertainment','science'];
+    order.forEach((sec,i)=>{
+      const sl=list.filter(a=>a.sec===sec);
+      if(!sl.length)return;
+      const cat=CATS[sec];
+      const wrap=document.createElement('div');wrap.className='feed-section';
+      const hd=document.createElement('div');hd.className='sec-hd';
+      hd.innerHTML=`<span class="sec-label"><span class="cat-dot" style="background:${cat.color}"></span>${cat.icon} ${cat.label}</span>`;
+      wrap.appendChild(hd);
+      wrap.appendChild(makeTopCard(sl[0]));
+      if(sl.length>1)wrap.appendChild(makeCluster(sl.slice(1,5)));
+      if(i>0&&i%2===0)wrap.appendChild(makeAdEl());
+      el.appendChild(wrap);
+    });
+  } else {
+    // Flat list view
+    const wrap=document.createElement('div');wrap.className='feed-section';
+    const hd=document.createElement('div');hd.className='sec-hd';
+    hd.innerHTML=`<span class="sec-label">${secName}</span>`;
+    wrap.appendChild(hd);
+    wrap.appendChild(makeTopCard(list[0]));
+    if(list.length>1)wrap.appendChild(makeCluster(list.slice(1)));
+    el.appendChild(wrap);
+  }
+}
+
+function makeTopCard(a){
+  const d=document.createElement('div');d.className='top-card';
+  const followed=isF(a.src);
+  const cat=CATS[a.sec];
+  d.innerHTML=`<div class="tc-body">
+    <div class="tc-sec"><span style="width:7px;height:7px;border-radius:50%;background:${cat?.color||'#5f6368'};display:inline-block"></span>${cat?.icon||''} ${cat?.label||''} · <span style="font-weight:400">${a.tag}</span> <span class="flag-badge">${a.flag||''}</span></div>
+    <div class="tc-title">${a.title}</div>
+    <div class="tc-sum">${a.sum}</div>
+    <div class="tc-foot">
+      <div class="tc-src-row">
+        <div class="src-av" style="background:${c(a.src)}">${av(a.src)}</div>
+        <button class="src-name-link" onclick="event.stopPropagation();filterBySrc('${a.src}')">${a.src}</button>
+        <span class="tc-dot"></span>
+        <span class="tc-time">${a.time}</span>
+        ${a.isNew?`<span class="badge-new">New</span>`:''}
+        ${a.hot?`<span class="badge-hot">🔥 Trending</span>`:''}
+      </div>
+      <button class="follow-src-btn${followed?' on':''}" onclick="event.stopPropagation();toggleF('${a.src}',this)">
+        <span>${followed?'⭐':'☆'}</span> ${followed?'Following':'Follow '+a.src}
+      </button>
+    </div>
+  </div>`;
+  d.onclick=()=>openArt(a);
+  return d;
+}
+
+function makeCluster(articles){
+  const wrap=document.createElement('div');wrap.className='cluster';
+  articles.forEach(a=>{
+    const row=document.createElement('div');row.className='cl-row';
+    row.innerHTML=`
+      <div class="cl-av" style="background:${c(a.src)}">${av(a.src)}</div>
+      <div class="cl-body">
+        <div class="cl-title">${a.title}</div>
+        <div class="cl-meta">
+          <span class="cl-src" onclick="event.stopPropagation();filterBySrc('${a.src}')">${a.src}</span>
+          <span class="flag-badge">${a.flag||''}</span>
+          <span class="cl-time">${a.time}</span>
+          ${a.isNew?`<span class="badge-new">New</span>`:''}
+          ${a.hot?`<span class="badge-hot">🔥</span>`:''}
+        </div>
+      </div>
+      <button class="cl-star${isF(a.src)?' on':''}" onclick="event.stopPropagation();toggleF('${a.src}',this)" title="Follow ${a.src}">${isF(a.src)?'⭐':'☆'}</button>`;
+    row.onclick=()=>openArt(a);
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+
+function makeAdEl(){
+  const ad=FEED_ADS[_adIdx%FEED_ADS.length];_adIdx++;
+  const el=document.createElement('div');el.className='feed-ad';
+  el.innerHTML=`<span class="ad-lbl">Ad</span><div class="ad-body"><span class="ad-t">${ad.t}</span><span class="ad-u">${ad.u}</span><span class="ad-d">${ad.d}</span></div>`;
+  return el;
+}
+
+function toggleF(name,btn){
+  let s=SOURCES.find(x=>x.name===name);
+  if(!s){s={name,cat:'General',f:false};SOURCES.push(s);}
+  s.f=!s.f;
+  document.querySelectorAll('.follow-src-btn').forEach(b=>{
+    if(b===btn){b.classList.toggle('on',s.f);b.innerHTML=`<span>${s.f?'⭐':'☆'}</span> ${s.f?'Following':'Follow '+name}`;}
+  });
+  document.querySelectorAll('.cl-star').forEach(b=>{
+    if(b===btn){b.classList.toggle('on',s.f);b.textContent=s.f?'⭐':'☆';}
+  });
+  if(_openArt&&_openArt.src===name){
+    document.getElementById('pop-fol').classList.toggle('on',s.f);
+    document.getElementById('pop-fol-star').textContent=s.f?'⭐':'☆';
+    document.getElementById('pop-fol-txt').textContent=s.f?'Following':'Follow';
+  }
+  renderMySrc();
+  renderAllSrc(document.getElementById('src-q').value||'');
+  toast(s.f?`Now following ${name} ⭐`:`Unfollowed ${name}`);
+}
+
+function togglePopFol(){
+  if(!_openArt)return;
+  const s=SOURCES.find(x=>x.name===_openArt.src);
+  toggleF(_openArt.src,null);
+  const sf=s?.f;
+  document.getElementById('pop-fol').classList.toggle('on',sf);
+  document.getElementById('pop-fol-star').textContent=sf?'⭐':'☆';
+  document.getElementById('pop-fol-txt').textContent=sf?'Following':'Follow';
+}
+
+function renderMySrc(){
+  const el=document.getElementById('my-sources');
+  const fl=SOURCES.filter(s=>s.f);
+  if(!fl.length){el.innerHTML='<div style="padding:14px 16px;font-size:0.78rem;color:var(--muted);line-height:1.7">No sources followed yet.<br>Click <strong>☆</strong> next to any story.</div>';return;}
+  el.innerHTML='';
+  fl.forEach(s=>{
+    const r=document.createElement('div');r.className='my-src-row';r.onclick=()=>filterBySrc(s.name);
+    r.innerHTML=`<div class="msr-av" style="background:${c(s.name)}">${av(s.name)}</div><div class="msr-info"><span class="msr-name">${s.name}</span><span class="msr-cat">${s.cat}</span></div><button class="msr-rm" onclick="event.stopPropagation();toggleF('${s.name}',null)" title="Unfollow">✕</button>`;
+    el.appendChild(r);
+  });
+}
+
+function renderAllSrc(q=''){
+  const el=document.getElementById('all-src-list');el.innerHTML='';
+  SOURCES.filter(s=>!q||s.name.toLowerCase().includes(q.toLowerCase())||s.cat.toLowerCase().includes(q.toLowerCase())).forEach(s=>{
+    const r=document.createElement('div');r.className='asr-row';
+    r.innerHTML=`<div class="asr-av" style="background:${c(s.name)}">${av(s.name)}</div><div class="asr-info"><div class="asr-name">${s.name}</div><div class="asr-cat">${s.cat}</div></div><button class="asr-btn${s.f?' on':''}" onclick="toggleF('${s.name}',this)">${s.f?'Following':'Follow'}</button>`;
+    el.appendChild(r);
+  });
+}
+
+function openArt(a){
+  _openArt=a;
+  const s=SOURCES.find(x=>x.name===a.src);
+  const followed=s?.f||false;
+  const cat=CATS[a.sec];
+  document.getElementById('pop-av').style.background=c(a.src);
+  document.getElementById('pop-av').textContent=av(a.src);
+  document.getElementById('pop-nm').textContent=a.src;
+  document.getElementById('pop-cat-lbl').textContent=s?.cat||'';
+  document.getElementById('pop-fol').classList.toggle('on',followed);
+  document.getElementById('pop-fol-star').textContent=followed?'⭐':'☆';
+  document.getElementById('pop-fol-txt').textContent=followed?'Following':'Follow';
+  document.getElementById('pop-sec').innerHTML=`${cat?.icon||''} ${cat?.label||''} · <span style="font-weight:400">${a.tag}</span> ${a.flag||''}`;
+  document.getElementById('pop-ttl').textContent=a.title;
+  document.getElementById('pop-time').textContent='🕒 '+a.time;
+  document.getElementById('pop-views').textContent='👁 '+a.views.toLocaleString()+' views';
+  document.getElementById('pop-sum').textContent=a.sum;
+  document.getElementById('pop-link').href=a.url;
+  const relEl=document.getElementById('pop-rel');relEl.innerHTML='';
+  A.filter(x=>x.sec===a.sec&&x.id!==a.id).slice(0,3).forEach(r=>{
+    const d=document.createElement('div');d.className='pop-rel-item';d.onclick=()=>openArt(r);
+    d.innerHTML=`<div class="pop-rel-av" style="background:${c(r.src)}">${av(r.src)}</div><div><span class="pop-rel-src">${r.src} ${r.flag||''} · ${r.time}</span><div class="pop-rel-ttl">${r.title}</div></div>`;
+    relEl.appendChild(d);
+  });
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePop(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';_openArt=null;}
+
+function switchSec(sec,el){
+  _sec=sec;
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderFeed();
+  window.scrollTo({top:120,behavior:'smooth'});
+}
+
+function filterBySrc(name){
+  const el=document.getElementById('feed');el.innerHTML='';
+  const list=A.filter(a=>a.src===name);
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('on'));
+  const wrap=document.createElement('div');wrap.className='feed-section';
+  const hd=document.createElement('div');hd.className='sec-hd';
+  hd.innerHTML=`<span class="sec-label">📰 ${name}</span><span class="sec-all" onclick="switchSec('all',document.querySelector('.s-tab'))">← All news</span>`;
+  wrap.appendChild(hd);
+  if(list.length){wrap.appendChild(makeTopCard(list[0]));if(list.length>1)wrap.appendChild(makeCluster(list.slice(1)));}
+  else wrap.innerHTML+='<div style="padding:20px;color:var(--muted)">No stories from this source</div>';
+  el.appendChild(wrap);
+}
+
+function scrollToSources(){document.getElementById('all-src-widget').scrollIntoView({behavior:'smooth'});}
+
+function toast(msg){
+  const el=document.getElementById('toast-el');el.textContent=msg;el.classList.add('show');
+  clearTimeout(window._tt);window._tt=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop();});
+renderAllSrc();renderMySrc();renderFeed();
+</script>
+</body>
+</html>
+<script>
+// Supabase live data loader
+const SUPA_URL = 'https://piyqmziuyjctisakigeq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpeXFteml1eWpjdGlzYWtpZ2VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxOTIzNTksImV4cCI6MjA4ODc2ODM1OX0._QagJK7lt6A-33nBQkjHKY5O8oah1oWJyKeTfcfg8y4';
+
+async function loadLiveArticles() {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=100`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      // Map DB columns to our article format
+      const live = data.map(r => ({
+        id: r.id,
+        sec: r.category,
+        src: r.source,
+        title: r.title,
+        time: timeAgo(r.published_at),
+        isNew: isRecent(r.published_at, 60),
+        hot: r.is_hot,
+        views: r.views || Math.floor(Math.random()*50000)+1000,
+        tag: r.tag || r.category,
+        flag: r.flag || '🌍',
+        url: r.url,
+        sum: r.summary || ''
+      }));
+      // Replace static articles with live ones
+      A.splice(0, A.length, ...live);
+      renderFeed();
+    }
+  } catch(e) {
+    console.log('Using static data:', e.message);
+  }
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} hr ago`;
+  return `${Math.floor(diff/86400)} days ago`;
+}
+
+function isRecent(ts, minutes) {
+  return (Date.now() - new Date(ts)) < minutes * 60 * 1000;
+}
+
+// Load live data on page load, refresh every 5 minutes
+loadLiveArticles();
+setInterval(loadLiveArticles, 5 * 60 * 1000);
+</script>

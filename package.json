@@ -1,0 +1,8 @@
+{
+  "name": "linkpedia",
+  "version": "1.0.0",
+  "description": "Linkpedia news aggregator",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
